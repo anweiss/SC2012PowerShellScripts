@@ -49,7 +49,7 @@ This command allows you to create a VM named "NewVM01" with a differencing disk.
 .NOTES
 Author:  Andrew Weiss
 Email:   andrew.weiss@microsoft.com
-Date: 	 10/25/2012
+Date:    10/25/2012
 Version: 1.0
 
 *To enable CredSSP authentication and quickly configure Windows Remote Management
@@ -92,7 +92,7 @@ On the target host(s) -> winrm quickconfig
         {
             # Check to see if VMM Module has been loaded
             # If not, load it
-            Write-Host "Checking to see if the VirtualMachineManager module has been loaded..."
+            Write-Output "Checking to see if the VirtualMachineManager module has been loaded..."
             $vmmModule = "virtualmachinemanager"
             if (!(Get-Module | ? {$_.Name -eq $vmmModule}))
             {
@@ -100,7 +100,7 @@ On the target host(s) -> winrm quickconfig
                 else { throw "You do not have the Virtual Machine Manager PowerShell module installed on your system" }
             }
                 
-            Write-Host "Module loaded successfully"
+            Write-Output "Module loaded successfully"
 
             if ($VM -eq $null) { throw "The VMName to create has not been specified" }
                 
@@ -121,8 +121,8 @@ On the target host(s) -> winrm quickconfig
         {
             try
             {
-                Write-Host "Creating the $VM virtual machine"
-                Write-Host "Obtaining the appropriate information from VMM..."
+                Write-Output "Creating the $VM virtual machine"
+                Write-Output "Obtaining the appropriate information from VMM..."
 
                 # Select a random host object if a cloud is specified in the cmdlet
                 if ($Cloud -ne $null)
@@ -220,20 +220,20 @@ On the target host(s) -> winrm quickconfig
 
                     $vmHostParentVHDPath = $vmHostParentVHDPath + [system.io.path]::GetFileName($VHD.SharePath);
 
-                    Write-Host "Checking to see if the parent VHD file exists on the target host..."                            
+                    Write-Output "Checking to see if the parent VHD file exists on the target host..."                            
                     
                     # Check to see if the parent VHD exists on the host
                     # and if it doesn't, copy the parent VHD from the VMM Library
                     # to the host (multi-hop authentication utilized here)
                     if (!(Test-Path $vmHostParentVHDPath))
                     {
-                        Write-Host "Parent VHD does not exist...copying now"
+                        Write-Output "Parent VHD does not exist...copying now"
 	                    [System.IO.File]::Copy($VHD.SharePath,$vmHostParentVHDPath)
-                        Write-Host "Parent VHD file copied to the target host successfully"
+                        Write-Output "Parent VHD file copied to the target host successfully"
                     }
                     else
                     {
-                        Write-Host "Parent VHD file already exists on the host"
+                        Write-Output "Parent VHD file already exists on the host"
                     }
                 } -argumentlist $vmHostDiffVHDPath, $vmHostParentVHDPath, $VHD
 
@@ -265,7 +265,7 @@ On the target host(s) -> winrm quickconfig
                         $Result = $VHDService.CreateDifferencingVirtualHardDisk($childPath, $parentPath)
                     }
 
-                    Write-Host "Creating the differencing disk on the target host..."
+                    Write-Output "Creating the differencing disk on the target host..."
                     
                     CreateDiffDiskOnHost "$VMHost" "$targetVHDPath" "$parentVHDPath"
                     
@@ -274,7 +274,7 @@ On the target host(s) -> winrm quickconfig
                     
                     if (Test-Path $targetVHDPath)
                     {
-                        Write-Host "Successfully created the differencing disk on the target host..."
+                        Write-Output "Successfully created the differencing disk on the target host..."
                     }
                     else
                     {
@@ -312,13 +312,13 @@ On the target host(s) -> winrm quickconfig
                         $obj
                     }
                     
-                    Write-Host "Testing the VHD file to ensure that it is not locked for use..."
+                    Write-Output "Testing the VHD file to ensure that it is not locked for use..."
                     $lockstate = TestFileLock "$targetVHDPath"
                     if ($lockstate.IsLocked) { Start-Sleep -s 30 }
 
                 } -argumentlist $targetVHDPath
 
-                Write-Host "Creating the virtual machine..."
+                Write-Output "Creating the virtual machine..."
 
                 # Instantiate new GUID
                 $guid = [guid]::NewGuid()
@@ -328,7 +328,7 @@ On the target host(s) -> winrm quickconfig
                 $description = $template.tag
                 if (New-SCVirtualMachine -Name $VM -VMHost $vmHostObject -VMTemplate $template -UseLocalVirtualHardDisk -HardwareProfile $hardwareProfile -ComputerName $VM -Path $vmHostPath -DelayStartSeconds $startDelay  -Description "$description" -MergeAnswerFile $true -BlockDynamicOptimization $false -StartVM -JobGroup "$guid" -RunAsynchronously -StartAction "AlwaysAutoTurnOnVM" -StopAction "SaveVM")
                 {
-                    Write-Host "The virtual machine creation process for $VM has been successfully initiated"
+                    Write-Output "The virtual machine creation process for $VM has been successfully initiated"
                 }
                 else { throw "The virtual machine creation process for $VM could not be successfully initiated" }
             }
