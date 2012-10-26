@@ -80,7 +80,7 @@ On the target host(s) -> winrm quickconfig
     begin
     {
         $tempErrAction = $ErrorActionPreference
-        $ErrorActionPreference = "Continue"
+        $ErrorActionPreference = "Stop"
     }
 
     process
@@ -92,7 +92,6 @@ On the target host(s) -> winrm quickconfig
         {
             # Check to see if VMM Module has been loaded
             # If not, load it
-
             Write-Host "Checking to see if the VirtualMachineManager module has been loaded..."
             $vmmModule = "virtualmachinemanager"
             if (!(Get-Module | ? {$_.Name -eq $vmmModule}))
@@ -102,8 +101,21 @@ On the target host(s) -> winrm quickconfig
             }
                 
             Write-Host "Module loaded successfully"
+
+            if ($VM -eq $null) { throw "The VMName to create has not been specified" }
+                
+            # Obtain VMM Hardware Profile Object
+            $hardwareProfile = Get-SCHardwareProfile -VMMServer $VMMServer  | ? {$_.Name -eq $HardwareProfileName}
+            if ($hardwareProfile -eq $null) { throw "Cannot obtain the specified hardware profile"; exit 1 }
+
+            # Obtain VMM VM Template Object
+            $template = Get-SCVMTemplate -VMMServer $VMMServer -All | ? {$_.Name -eq $TemplateName}
+            if ($template -eq $null) { throw "Cannot obtain the specified template" }
+
+            # Obtain VHD information from the template
+            $VHD =  Get-SCVirtualharddisk | ? {$_.Name -eq $template.VirtualDiskDrives[0].VirtualHardDisk}
         }
-        catch { Write-Error $_ }
+        catch { throw $_ }
 
         foreach ($VM in $VMName)      
         {
@@ -111,27 +123,6 @@ On the target host(s) -> winrm quickconfig
             {
                 Write-Host "Creating the $VM virtual machine"
                 Write-Host "Obtaining the appropriate information from VMM..."
-
-                if ($VM -eq $null) { throw "The VMName to create has not been specified" }
-                
-                $VMMServer = Get-SCVMMServer "$VMMServer"
-
-                if ($VMMServer -eq $null)
-                {
-                    throw "The VMM Server can't be reached. Exiting script"
-                    exit 1
-                }
-                
-                # Obtain VMM Hardware Profile Object
-                $hardwareProfile = Get-SCHardwareProfile -VMMServer $VMMServer  | ? {$_.Name -eq $HardwareProfileName}
-                if ($hardwareProfile -eq $null) { throw "Cannot obtain the specified hardware profile"; exit 1 }
-
-                # Obtain VMM VM Template Object
-                $template = Get-SCVMTemplate -VMMServer $VMMServer -All | ? {$_.Name -eq $TemplateName}
-                if ($template -eq $null) { throw "Cannot obtain the specified template" }
-    
-                # Obtain VHD information from the template
-                $VHD =  Get-SCVirtualharddisk | ? {$_.Name -eq $template.VirtualDiskDrives[0].VirtualHardDisk}              
 
                 # Select a random host object if a cloud is specified in the cmdlet
                 if ($Cloud -ne $null)
@@ -182,7 +173,7 @@ On the target host(s) -> winrm quickconfig
                 }
                 else
                 {
-                    throw "You must specify either a cloud or a host to which the VM will be deployed"
+                    throw "You must specify either a cloud or a host to which $VM will be deployed"
                 }
                 
                 $VMHost = $vmHostObject.Name
