@@ -102,7 +102,7 @@ On the target host(s) -> winrm quickconfig
                 
             Write-Output "Module loaded successfully"
 
-            if ($VM -eq $null) { throw "The VMName to create has not been specified" }
+            if ($VMName -eq $null) { throw "The VMName to create has not been specified" }
                 
             # Obtain VMM Hardware Profile Object
             $hardwareProfile = Get-SCHardwareProfile -VMMServer $VMMServer  | ? {$_.Name -eq $HardwareProfileName}
