@@ -102,6 +102,8 @@ On the target host(s) -> winrm quickconfig
                 
             Write-Output "Module loaded successfully"
 
+            Write-Output "Initializing the appropriate VMM objects"
+
             if ($VMName -eq $null) { throw "The VMName to create has not been specified" }
                 
             # Obtain VMM Hardware Profile Object
@@ -114,6 +116,11 @@ On the target host(s) -> winrm quickconfig
 
             # Obtain VHD information from the template
             $VHD =  Get-SCVirtualharddisk | ? {$_.Name -eq $template.VirtualDiskDrives[0].VirtualHardDisk}
+            if ($VHD -eq $null) { throw "Cannot obtain the current VHD information from the specified template" }
+
+            # Cache all of the VM Hosts locally
+            $vmHostCache = Get-SCVMHost -VMMServer $VMMServer
+            if ($vmHostCache -eq $null) { throw "Cannot obtain the VM host information for local caching" }
         }
         catch { throw $_ }
 
