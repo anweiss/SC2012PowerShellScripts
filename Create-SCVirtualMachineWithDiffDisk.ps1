@@ -50,7 +50,10 @@ This command allows you to create a VM named "NewVM01" with a differencing disk.
 Author:  Andrew Weiss
 Email:   andrew.weiss@microsoft.com
 Date:    10/25/2012
-Version: 1.0
+Updated: 11/02/2012
+Version: 1.1
+
+Updated with bug fixes.
 
 *To enable CredSSP authentication and quickly configure Windows Remote Management
 execute the following commands using an administrative Powershell Console:
@@ -63,18 +66,18 @@ On the target host(s) -> winrm quickconfig
 
     param
     (
-	    [Parameter(Position=0,ValueFromPipeline=$true)]
-	    [string]$VMMServer = "localhost",
-        [Parameter(Mandatory=$true)]
+	[Parameter(Position=0,ValueFromPipeline=$true)]
+	[string]$VMMServer = "localhost",
+	[Parameter(Mandatory=$true)]
         [alias("VM","VirtualMachineName")]
-	    [string[]]$VMName,
+	[string[]]$VMName,
         [alias("Template")]
-	    [string]$TemplateName,
+	[string]$TemplateName,
         [alias("HardwareProfile")]
-	    [string]$HardwareProfileName,
+	[string]$HardwareProfileName,
         [string]$Cloud,
-	    [string]$VMHost,
-	    [System.Management.Automation.PSCredential]$Credential
+	[string]$VMHost,
+	[System.Management.Automation.PSCredential]$Credential
     )
 
     begin

@@ -55,6 +55,8 @@ Date:    10/25/2012
 Updated: 10/31/2012
 Version: 1.5
 
+*This script requires PowerShell v3 and System Center 2012 SP1 - Virtual Machine Manager in order to execute.
+
 *To enable CredSSP authentication and quickly configure Windows Remote Management
 execute the following commands using an administrative Powershell Console:
 On the client machine -> Enable-WSManCredSSP -Role Client -DelegateComputer "<FQDN of VMM Server>"
@@ -71,6 +73,7 @@ On the target host(s) -> winrm quickconfig
         [Parameter(Mandatory=$true)]
         [alias("VM","VirtualMachineName")]
 	    [string[]]$VMName,
+        [Parameter(Mandatory=$true)]
         [alias("Template")]
 	    [string]$TemplateName,
         [alias("HardwareProfile")]
